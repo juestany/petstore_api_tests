@@ -1,0 +1,1607 @@
+{
+	"info": {
+		"_postman_id": "769bb4bf-8590-4e6e-a88d-49c1295a775e",
+		"name": "Petstore API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33394134"
+	},
+	"item": [
+		{
+			"name": "pet",
+			"item": [
+				{
+					"name": "Positive",
+					"item": [
+						{
+							"name": "Create a pet",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the reponse status is 200",
+											"pm.test(\"Response status is 200\", () => {",
+											"    pm.expect(pm.response.code).to.eql(200);",
+											"});",
+											"",
+											"// Setting a global var by extracting the large number through string",
+											"const rawBody = pm.response.text();",
+											"const match = rawBody.match(/\"id\"\\s*:\\s*(\\d+)/);",
+											"if (match) {",
+											"    const petId = match[1];",
+											"    pm.globals.set(\"valid_petId\", petId)",
+											"} "
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"id\": 0,\n  \"category\": {\n    \"id\": 0,\n    \"name\": \"dog\"\n  },\n  \"name\": \"Doggie\",\n  \"photoUrls\": [\n    \"testPhotoUrl\"\n  ],\n  \"tags\": [\n    {\n      \"id\": 0,\n      \"name\": \"cute\"\n    }\n  ],\n  \"status\": \"available\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/pet",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create a pet image",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Upload a pet image",
+											"pm.test('The response status is 200', () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if the response contains the message property",
+											"pm.test(\"The response has a 'message' property with the correct value\", () => {",
+											"    const responseJson = pm.response.json();",
+											"    pm.expect(responseJson).to.have.property(\"message\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "postman-cloud:///1f0709ea-3a70-40e0-ab34-eec20c9aa0d0"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/pet/{{valid_petId}}/uploadImage",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"{{valid_petId}}",
+										"uploadImage"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update a pet with form data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 200",
+											"pm.test(\"Status code is 200\", () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if the response body contains the message with global var value",
+											"pm.test(\"Response body contains message with global var value\", () => {",
+											"    pm.expect(pm.response.text()).to.include(pm.globals.get(\"valid_petId\"));",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/pet/{{valid_petId}}?name=newName&status=sold",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"{{valid_petId}}"
+									],
+									"query": [
+										{
+											"key": "name",
+											"value": "newName"
+										},
+										{
+											"key": "status",
+											"value": "sold"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get pet by valid ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the status code is 200",
+											"pm.test(\"Status code is 200\", () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if the response body contains the correct data ",
+											"pm.test(\"Response body has name and status\", () => {",
+											"    const responseJson = pm.response.json();",
+											"    pm.expect(responseJson).to.have.property(\"name\");",
+											"    pm.expect(responseJson).to.have.property(\"status\");",
+											"});",
+											"",
+											"// Checking if the response data contains pet id",
+											"pm.test(\"Response data contains pet id with saved global var\", () => {",
+											"    const rawBody = pm.response.text();",
+											"    const match = rawBody.match(/\"id\"\\s*:\\s*(\\d+)/);",
+											"    const petId = match[1];",
+											"    pm.expect(petId).to.eql(pm.globals.get(\"valid_petId\"));",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/pet/{{valid_petId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"{{valid_petId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get pet by status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 200",
+											"pm.test('Status code is 200', () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if the reponse body is an array",
+											"pm.test('Response body is an array', () => {",
+											"    pm.response.to.be.json;",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.be.an('array');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/pet/findByStatus?status={{valid_status}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"findByStatus"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "{{valid_status}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update an existing pet",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status code is 200",
+											"pm.test('Status code is 200', () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if the response body contains the correct data",
+											"pm.test('Response body contains correct data', () => {",
+											"    const rawBody = pm.response.text();",
+											"    const match = rawBody.match(/\"id\"\\s*:\\s*(\\d+)/);",
+											"    const petId = match[1];",
+											"    pm.expect(petId).to.eql(pm.globals.get(\"valid_petId\"));",
+											"});",
+											"",
+											"// Checking if the response body has the right properties",
+											"pm.test('Response body has the right properties', () => {",
+											"    const responseJson = pm.response.json();",
+											"    pm.expect(responseJson).to.have.property(\"category\");",
+											"    pm.expect(responseJson).to.have.property(\"name\");",
+											"    pm.expect(responseJson).to.have.property(\"photoUrls\");",
+											"    pm.expect(responseJson).to.have.property(\"tags\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"id\": {{valid_petId}},\n  \"category\": {\n    \"id\": 0,\n    \"name\": \"dog\"\n  },\n  \"name\": \"Doggie2\",\n  \"photoUrls\": [\n    \"testPhotoUrl\"\n  ],\n  \"tags\": [\n    {\n      \"id\": 0,\n      \"name\": \"cute\"\n    }\n  ],\n  \"status\": \"sold\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/pet",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete a pet with valid ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 200",
+											"pm.test('Status code is 200', () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if the message is the global var in the response body",
+											"pm.test('Response message is the global var id', () => {",
+											"    pm.expect(pm.response.json().message).to.eql(pm.globals.get(\"valid_petId\"));",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "api_key",
+										"value": "{{api_key}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/pet/{{valid_petId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"{{valid_petId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Negative",
+					"item": [
+						{
+							"name": "Get pet by nonexisting ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status code is 404",
+											"pm.test(\"Status code is 404\", () => {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"// Checking error message",
+											"pm.test(\"Error message is 'Pet not found'\", () => {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('Pet not found');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/pet/{{nonexisting_petId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"{{nonexisting_petId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get pet by invalid ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 400 or 404",
+											"pm.test(\"Status code is 400 or 404\", () => {",
+											"    pm.expect(pm.response.code).to.be.oneOf([400,404]);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/pet/{{invalid_petId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"{{invalid_petId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create a pet with invalid method",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Status code is 405', () => {",
+											"    pm.response.to.have.status(405); ",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/pet",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update a pet with invalid method",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 405",
+											"pm.test('Status code is 405', () => {",
+											"    pm.response.to.have.status(405);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/pet",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update a pet with invalid body input",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status code is 400",
+											"pm.test('Status code is 400', () => {",
+											"    pm.response.to.have.status(400);",
+											"    var jsonResponse = pm.response.json();",
+											"    pm.expect(jsonResponse.message).to.eql('bad input');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"invalid\": }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/pet",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get pet by invalid status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Simulating a 400 error response through returning an empty list",
+											"pm.test(\"Invalid status returns an empty list\", () => {",
+											"    pm.response.to.have.status(200);",
+											"    var body = pm.response.json();",
+											"    pm.expect(body.length).to.eql(0);",
+											"})"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/pet/findByStatus",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"findByStatus"
+									]
+								},
+								"description": "Can't simulate 400 status because the API isn't validated, with invalid status it returns an empty array and a 200."
+							},
+							"response": []
+						},
+						{
+							"name": "Update a pet with invalid input method",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 405",
+											"pm.test('Status code is 405', () => {",
+											"    pm.response.to.have.status(405);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/pet/{{valid_petId}}?name=name&status=sold",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"{{valid_petId}}"
+									],
+									"query": [
+										{
+											"key": "name",
+											"value": "name"
+										},
+										{
+											"key": "status",
+											"value": "sold"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete a pet with invalid ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 404",
+											"pm.test('Status code is 404', () => {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "api_key",
+										"value": "{{api_key}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/pet/{{invalid_petId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"pet",
+										"{{invalid_petId}}"
+									]
+								},
+								"description": "Unable to get the 400 status code because of the API tries to parse the string as a number and fails"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "store",
+			"item": [
+				{
+					"name": "Positive",
+					"item": [
+						{
+							"name": "Create a pet order",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if response status is 200",
+											"pm.test(\"Status code is 200\", () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if response body contains the correct data",
+											"pm.test(\"Response body contains correct global var petId, id and status\", () => {",
+											"    const rawBody = pm.response.text();",
+											"    const matchPetId = rawBody.match(/\"petId\"\\s*:\\s*(\\d+)/); ",
+											"    const matchOrderId = rawBody.match(/\"id\"\\s*:\\s*(\\d+)/);",
+											"    const jsonData = pm.response.json();",
+											"    if (matchPetId, matchOrderId) {",
+											"        const petId = matchPetId[1];",
+											"        const orderId = matchOrderId[1];",
+											"        pm.expect(petId).to.eql(pm.globals.get(\"valid_petId\"));",
+											"        pm.globals.set(\"valid_orderId\", orderId)",
+											"    }",
+											"    pm.expect(jsonData).to.have.property(\"id\");",
+											"    pm.expect(jsonData).to.have.property(\"status\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"id\": 0,\n  \"petId\": {{valid_petId}},\n  \"quantity\": 0,\n  \"shipDate\": \"2025-08-04T13:19:46.725Z\",\n  \"status\": \"placed\",\n  \"complete\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/store/order",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"store",
+										"order"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a valid pet order",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the reponse status is 200",
+											"pm.test(\"Response status is 200\", () => {",
+											"    pm.expect(pm.response.code).to.eql(200);",
+											"});",
+											"",
+											"// Checking if the response body contains the correct order id",
+											"pm.test(\"Response body contains the correct order id, \", () => {",
+											"    const rawBody = pm.response.text();",
+											"    const match = rawBody.match(/\"id\"\\s*:\\s*(\\d+)/);",
+											"    const orderId = match[1];",
+											"    pm.expect(orderId).to.eql(pm.globals.get(\"valid_orderId\"));",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/store/order/{{valid_orderId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"store",
+										"order",
+										"{{valid_orderId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get pet inventories by status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if response status is 200",
+											"pm.test(\"Status code is 200\", () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if response is an object",
+											"pm.test(\"Response is an object\", () => {",
+											"    pm.expect(pm.response.json()).to.be.an('object');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/store/inventory",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"store",
+										"inventory"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete a pet order with valid ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 200",
+											"pm.test('Status code is 200', () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if the message is the global var in the response body",
+											"pm.test('Response message is the global var id', () => {",
+											"    pm.expect(pm.response.json().message).to.eql(pm.globals.get(\"valid_orderId\"));",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "api_key",
+										"value": "{{api_key}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/store/order/{{valid_orderId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"store",
+										"order",
+										"{{valid_orderId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Negative",
+					"item": [
+						{
+							"name": "Create an invalid pet order",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if response status is 400",
+											"pm.test(\"Response status is 400\", () => {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"// Checking if repsonse message is 'bad input'",
+											"pm.test(\"Response message is 'bad input\", () => {",
+											"    pm.expect(pm.response.text()).to.include(\"bad input\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"id\": 0,\n  \"petId\": {{invalid_petId}},\n  \"quantity\": 0,\n  \"shipDate\": \"2025-08-04T13:19:46.725Z\",\n  \"status\": \"placed\",\n  \"complete\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/store/order",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"store",
+										"order"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a pet order by invalid ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 400 or 404",
+											"pm.test(\"Status code is 400 or 404\", () => {",
+											"    pm.expect(pm.response.code).to.be.oneOf([400,404]);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/store/order/{{invalid_orderId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"store",
+										"order",
+										"{{invalid_orderId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete a pet order with invalid ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 404",
+											"pm.test('Status code is 404', () => {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "api_key",
+										"value": "{{api_key}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/store/order/{{invalid_orderId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"store",
+										"order",
+										"{{invalid_orderId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a pet order by nonexisting ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status code is 404",
+											"pm.test(\"Status code is 404\", () => {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"// Checking error message",
+											"pm.test(\"Error message is 'Order not found'\", () => {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('Order not found');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/store/order/{{nonexisting_orderId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"store",
+										"order",
+										"{{nonexisting_orderId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "Positive",
+					"item": [
+						{
+							"name": "Create a user with valid body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Saving the new user id as a global var",
+											"const response = pm.response.json();",
+											"pm.globals.set(\"valid_userId\", response.message)",
+											" "
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "api_key",
+										"value": "{{api_key}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"id\": 0,\n  \"username\": \"{{valid_username}}\",\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"{{valid_password}}\",\n  \"phone\": \"string\",\n  \"userStatus\": 0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/user",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create a list of users",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response message is 'ok'\", () => {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('ok');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n  {\n    \"id\": 0,\n    \"username\": \"string\",\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"email\": \"string\",\n    \"password\": \"string\",\n    \"phone\": \"string\",\n    \"userStatus\": 0\n  }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/user/createWithList",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"createWithList"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create an array of users",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response message is 'ok'\", () => {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('ok');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n  {\n    \"id\": 0,\n    \"username\": \"string\",\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"email\": \"string\",\n    \"password\": \"string\",\n    \"phone\": \"string\",\n    \"userStatus\": 0\n  }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/user/createWithArray",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"createWithArray"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get user by valid username",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/{{valid_username}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"{{valid_username}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user with valid data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/login?username={{valid_username}}&password={{valid_password}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"login"
+									],
+									"query": [
+										{
+											"key": "username",
+											"value": "{{valid_username}}"
+										},
+										{
+											"key": "password",
+											"value": "{{valid_password}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Logout current user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Checking if response message is 'ok'",
+											"pm.test(\"Response message is 'ok'\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('ok');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/logout",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"logout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update user with valid username",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"id\": 0,\n  \"username\": \"{{new_valid_username}}\",\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"string\",\n  \"phone\": \"string\",\n  \"userStatus\": 0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/user/{{valid_username}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"{{valid_username}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete a user with valid username",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/{{valid_username}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"{{valid_username}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Negative",
+					"item": [
+						{
+							"name": "Get user by nonexisting username",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"User not found\", () => {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"pm.test(\"Response message is 'User not found\", () => {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql(\"User not found\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/{{nonexisting_username}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"{{nonexisting_username}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete a user with nonexisting username",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if the response status is 404",
+											"pm.test('Status code is 404', () => {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/{{nonexisting_username}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"{{nonexisting_username}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user with invalid username/password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Checking if response status is 400 ",
+											"pm.test(\"Status code is 400\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/login?username={{valid_username}}&password=invalidPassword",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"login"
+									],
+									"query": [
+										{
+											"key": "username",
+											"value": "{{valid_username}}"
+										},
+										{
+											"key": "password",
+											"value": "invalidPassword"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://petstore.swagger.io/v2",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "special-key",
+			"type": "string"
+		},
+		{
+			"key": "nonexisting_petId",
+			"value": "9999999990",
+			"type": "string"
+		},
+		{
+			"key": "invalid_petId",
+			"value": "dog",
+			"type": "string"
+		},
+		{
+			"key": "valid_status",
+			"value": "available",
+			"type": "string"
+		},
+		{
+			"key": "invalid_orderId",
+			"value": "abc",
+			"type": "string"
+		},
+		{
+			"key": "nonexisting_orderId",
+			"value": "-100",
+			"type": "string"
+		},
+		{
+			"key": "valid_username",
+			"value": "validUsername",
+			"type": "string"
+		},
+		{
+			"key": "nonexisting_username",
+			"value": "5",
+			"type": "string"
+		},
+		{
+			"key": "new_valid_username",
+			"value": "newValidUsername",
+			"type": "string"
+		},
+		{
+			"key": "valid_password",
+			"value": "validPassword",
+			"type": "string"
+		}
+	]
+}
